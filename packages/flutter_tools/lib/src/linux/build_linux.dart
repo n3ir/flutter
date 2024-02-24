@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:unified_analytics/unified_analytics.dart';
-
+import 'dart:io' show Platform; // flutter_ignore: dart_io_import
 import '../artifacts.dart';
 import '../base/analyze_size.dart';
 import '../base/common.dart';
@@ -130,6 +130,10 @@ Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buil
   if (!globals.processManager.canRun('cmake')) {
     throwToolExit(globals.userMessages.cmakeMissing);
   }
+  final Map<String, String> environment = <String, String>{
+    'CC': Platform.environment['CC'] ?? 'clang',
+    'CXX': Platform.environment['CXX'] ?? 'clang++',
+  };
   result = await globals.processUtils.stream(
     <String>[
       'cmake',
@@ -148,10 +152,7 @@ Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buil
       sourceDir.path,
     ],
     workingDirectory: buildDir.path,
-    environment: <String, String>{
-      'CC': 'clang',
-      'CXX': 'clang++',
-    },
+    environment: environment,
     trace: true,
   );
   if (result != 0) {
